@@ -22,3 +22,4 @@ Route::post('/generate-text', [OpenAIController::class, 'generateText']);
 
 Route::post('/submit-interview-user', [InterviewUserController::class, 'submit']);
 Route::post('/interview-question', [InterviewController::class, 'getQuestions']);
+Route::post('/interview-Answer', [InterviewUserController::class, 'SubmitAnswer']);
