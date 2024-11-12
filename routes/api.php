@@ -20,6 +20,11 @@ Route::post('login', [LoginController::class, 'login']);
 
 Route::post('/generate-text', [OpenAIController::class, 'generateText']);
 
-Route::post('/submit-interview-user', [InterviewUserController::class, 'submit']);
+Route::post('/submit-interview-user', [InterviewUserController::class, 'submitInterviewUser']);
 Route::post('/interview-question', [InterviewController::class, 'getQuestions']);
 Route::post('/interview-Answer', [InterviewUserController::class, 'SubmitAnswer']);
+
+
+Route::post('/interviewuser', [InterviewUserController::class, 'InterviewUserList']);
+Route::post('/interviewuser-answer', [InterviewUserController::class, 'InterviewUserAnswerList']);
+Route::post('/checked-answer', [InterviewUserController::class, 'CheckedAnswerSubmit']);
