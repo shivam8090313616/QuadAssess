@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InterviewResult;
+use App\Models\InterviewUserData;
 use App\Models\User;
 use App\Models\UserAnswer;
 use App\Services\InterviewUserService;  // Import the service
@@ -64,11 +65,8 @@ class InterviewUserController extends Controller
                 'uid' => 'required|string',  // Ensure 'uid' is provided (user ID)
             ]);
 
-            // Generate a unique interview ID
-            $interviewId = 'ITVW' . rand(100000, 999999);  // Random 6-digit interview ID
-
-            // Prepare the answers data as JSON
-            $answersData = [];
+            $interviewId = InterviewUserData::where('email',$validatedData['uid'])->first();
+            $interviewId = $interviewId->interview_id;
 
             // Loop through the data and build the answers JSON
             foreach ($validatedData['data'] as $entry) {
@@ -130,37 +128,30 @@ class InterviewUserController extends Controller
             'score' => 'required|integer',
             'correct_answers' => 'required|integer',
             'incorrect_answers' => 'required|integer',
+            'marks_per_question' => 'required|array',
         ]);
     
-        // Step 2: Find the user based on the provided email
-        $user = User::where('email', $validatedData['email'])->first();
+        // Step 2: Check if a user with the provided email exists
+        $user = InterviewUserData::where('email', $validatedData['email'])->first();
     
-        // Check if user exists
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+        if ($user) {
+            // If user exists, update the record
+            $user->update([
+                'score' => $validatedData['score'],
+                'correct_answers' => $validatedData['correct_answers'],
+                'incorrect_answers' => $validatedData['incorrect_answers'],
+                'marks_per_question' => json_encode($validatedData['marks_per_question']),
+            ]);
+    
+            return response()->json([
+                'message' => 'Interview result updated successfully!',
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'User not found with the given email.',
+            ], 404);
         }
-    
-        // Step 3: Find the interview ID associated with this user
-        $userAnswer = UserAnswer::where('user_id', $user->uid)->first();
-    
-        // Check if interview ID exists
-        if (!$userAnswer) {
-            return response()->json(['message' => 'Interview not found for this user'], 404);
-        }
-    
-        // Step 4: Create the interview result with validated data
-        $result = InterviewResult::create([
-            'interview_id' => $userAnswer->interview_id, // Assuming `id` is the correct interview ID
-            'score' => $validatedData['score'],
-            'correct_answers' => $validatedData['correct_answers'],
-            'incorrect_answers' => $validatedData['incorrect_answers'],
-        ]);
-    
-        // Step 5: Return a success response
-        return response()->json([
-            'message' => 'Interview result saved successfully!',
-            'data' => $result
-        ], 201);
     }
     
 }
