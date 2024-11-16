@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Answer;
 use App\Models\InterviewUser;  // Assuming InterviewUser is your model
+use App\Models\InterviewUserData;
 use App\Models\Question;
 use App\Models\User;
 use App\Models\UserAnswer;
@@ -30,14 +31,14 @@ class InterviewUserService
                 $experienceLevel = 3;
                 break;
             default:
-                // If invalid value is provided, you can either throw an exception or set a default value
                 throw new \InvalidArgumentException('Invalid experience level');
         }
+        $interview_id = strtoupper('INTV-' . uniqid() . '-' . mt_rand(10, 99)); // e.g., INTV-5F2C1E9A7B-5678
 
-        // Create a new instance of InterviewUser and save the data
-        $user = new InterviewUser();
+        $user = new InterviewUserData();
         $user->email = $data['email'];
-        $user->experienceLevel = $experienceLevel;  // Set mapped integer value
+        $user->interview_id = $interview_id;
+        $user->experienceLevel = $experienceLevel; 
         $user->name = $data['name'];
         $user->role = $data['role'];
         $user->skills = json_encode($data['skills']);  // Store skills as JSON
@@ -48,9 +49,11 @@ class InterviewUserService
         return $user;  // Return the saved user
     }
 
+   
+
     public function fetchInterviewUsers(?string $name = null, ?string $email = null)
     {
-        $query = InterviewUser::query();
+        $query = InterviewUserData::query();
 
         // Apply filters if provided
         if ($name) {
@@ -60,25 +63,25 @@ class InterviewUserService
             $query->where('email', 'LIKE', '%' . $email . '%');
         }
 
-        // Order by creation date in descending order
-        // If no filters are applied, this will fetch all users
         return $query->orderBy('created_at', 'desc')->get();
     }
 
     public function fetchInterviewUsersAnswer(?string $email = null)
     {
+        
         $user = User::where('email', $email)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found.'], 404);
         }
 
         $answerSheet = UserAnswer::select('answer_text')
-            ->where('user_id', $user->uid)
+            ->where('user_id', $email)
             ->first();
 
         if (!$answerSheet) {
             return response()->json(['message' => 'Answer sheet not found.'], 404);
         }
+       
         $answers = json_decode($answerSheet->answer_text, true);
         $questionIds = array_keys($answers);
         $questions = Question::whereIn('id', $questionIds)->get();
