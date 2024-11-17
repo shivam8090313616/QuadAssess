@@ -36,13 +36,16 @@ class InterviewUserController extends Controller
     {
         // Validate the incoming request
         $validatedData = $request->validate([
-            'email' => 'required|email|unique:interviewusers,email',
+            'email' => 'required|email',
             'experienceLevel' => 'required',
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
             'skills' => 'required|array',
             'skills.*' => 'string|max:255',
+            'status' => 'required|string', // Add validation for the `status` key
+            'status.*' => 'required',
         ]);
+        
 
         // Call the service to submit the data
         $user = $this->interviewUserService->submitData($validatedData);

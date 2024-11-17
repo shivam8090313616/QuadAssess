@@ -41,6 +41,7 @@ class InterviewUserService
         $user->experienceLevel = $experienceLevel; 
         $user->name = $data['name'];
         $user->role = $data['role'];
+        $user->status = $data['status'];
         $user->skills = json_encode($data['skills']);  // Store skills as JSON
 
         // Save the user data to the database

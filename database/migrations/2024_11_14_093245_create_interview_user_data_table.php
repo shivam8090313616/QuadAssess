@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('interview_user_data', function (Blueprint $table) {
             $table->id();
             $table->string('interview_id')->nullable(); // VARCHAR for interview_id, nullable
-            $table->string('email')->unique()->nullable();
+            $table->string('email')->nullable();
             $table->string('experienceLevel')->nullable();
             $table->string('name')->nullable();
             $table->string('role')->nullable();
